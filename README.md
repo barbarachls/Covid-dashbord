@@ -15,7 +15,7 @@ To use the Dashboard you first need to install in the command window:
 * pip install requests
  
 
-#How to use it
+# How to use it
 
 You first need to run the main.py module. Then open http://127.0.0.1:5000/index
 in your browser.
@@ -28,13 +28,13 @@ You will need **your own API key**, For that go to https://newsapi.org/ and
 generate you own key. You will then need to change the configuration file 
 and replace 'your API key' with yours.
 
-#Testing
+# Testing
 To test the different module/function of this project, Pytest needs to be 
 installed.
 
 * pip install pytest
 
-###Details
+### Details
 
 **_Project used for demonstration_**
 
