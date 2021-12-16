@@ -6,7 +6,7 @@ import json
 import logging
 from uk_covid19 import Cov19API
 from flask import request
-from covid_news_handling import update_news
+from covid_news_handling import news_articles
 
 logging.basicConfig(filename='dashboard.log', level=logging.DEBUG,
                     format='%(levelname)s: %(asctime)s %(module)s '
@@ -27,7 +27,6 @@ nation_loc_type = data['nation_location_type']
 
 def parse_csv_data(csv_filename: str) -> list:
     """Return all teh rows of the csv file in a list.
-
     :param csv_filename: arg1
     :return: list of all the rows
     """
@@ -42,7 +41,6 @@ def parse_csv_data(csv_filename: str) -> list:
 def process_covid_csv_data(covid_csv_data) -> tuple:
     """Return the number of new cases of covid in the last 7 days,
     the number of hospital cases, and the total of deaths.
-
     :param covid_csv_data: arg1
     :return: number of new cases, hospital cases and deaths
     """
@@ -68,7 +66,6 @@ def covid_API_request(location: str = 'Exeter', location_type: str = 'ltla') \
     the last 7 days, the number of current hospital cases, and the total of
     deaths with the location or the number of new cases in the last 7 days
     and the location.
-
     :param location: exact location, can be a city or a nation within the UK
     :param location_type: type of location for the API
     :return: return number of new cases, hospital cases, deaths and the
@@ -122,7 +119,6 @@ def covid_API_request(location: str = 'Exeter', location_type: str = 'ltla') \
 
 def update_covid_data():
     """Extract the data from the dictionary.
-
     :return: None
     """
     global local_7day_infections, location, national_7day_infections, \
@@ -139,7 +135,6 @@ def update_covid_data():
 
 def periodic(scheduler, interval, action, actionargs=()):
     """Schedule indefinitely an event
-
     :param scheduler: the scheudler
     :param interval: the time interval in seconds
     :param action: the function
@@ -155,7 +150,6 @@ def schedule_covid_updates(update_interval: float, update_name: str):
     """Schedules update of the covid data and news articles. The can be
     scheduled separately or together. It can be a one time event or a daily
     event.
-
     :param update_interval: the time interval in seconds
     :param update_name: the name of the scheudled update
     :return: None
@@ -176,22 +170,22 @@ def schedule_covid_updates(update_interval: float, update_name: str):
             cancel_update = e_1, e_2
     elif news and not covid_data:
         content = 'update news articles at ' + update_time
-        e_3 = s.enter(update_interval, 1, update_news)
+        e_3 = s.enter(update_interval, 1, news_articles)
         cancel_update = e_3
         if repeat_update:
             e_4 = s.enter(update_interval, 1, periodic, (s, 86400,
-                                                         update_news))
+                                                         news_articles))
             cancel_update = e_3, e_4
     elif news and covid_data:
         content = 'update covid data and news articles at ' + update_time
         e_5 = s.enter(update_interval, 1, update_covid_data)
-        e_6 = s.enter(update_interval, 1, update_news)
+        e_6 = s.enter(update_interval, 1, news_articles)
         cancel_update = e_5, e_6
         if repeat_update:
             e_7 = s.enter(update_interval, 1, periodic, (s, 86400,
                                                          update_covid_data))
             e_8 = s.enter(update_interval, 1, periodic, (s, 86400,
-                                                         update_news))
+                                                         news_articles))
             cancel_update = e_5, e_6, e_7, e_8
     UPDATE.append({
         'title': update_name,
@@ -219,7 +213,6 @@ def schedule_covid_updates(update_interval: float, update_name: str):
 def deleted_automated_update(*arguments: str):
     """If the scheduled update a one time only event, if will delete  the
     update from the interface.
-
     :param arguments: here the update name, decomposed into single letter
     string.
     :return: None
@@ -234,7 +227,6 @@ def deleted_automated_update(*arguments: str):
 def delete_schedule():
     """Delete the the scheduled event from the queue if the user delete the
     update from the interface.
-
     :return: None
     """
     logging.info('update has been deleted from interface and queue')
