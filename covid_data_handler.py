@@ -6,7 +6,7 @@ import json
 import logging
 from uk_covid19 import Cov19API
 from flask import request
-from covid_news_handling import news_articles
+from covid_news_handling import update_news
 
 logging.basicConfig(filename='dashboard.log', level=logging.DEBUG,
                     format='%(levelname)s: %(asctime)s %(module)s '
@@ -176,22 +176,22 @@ def schedule_covid_updates(update_interval: float, update_name: str):
             cancel_update = e_1, e_2
     elif news and not covid_data:
         content = 'update news articles at ' + update_time
-        e_3 = s.enter(update_interval, 1, news_articles)
+        e_3 = s.enter(update_interval, 1, update_news)
         cancel_update = e_3
         if repeat_update:
             e_4 = s.enter(update_interval, 1, periodic, (s, 86400,
-                                                         news_articles))
+                                                         update_news))
             cancel_update = e_3, e_4
     elif news and covid_data:
         content = 'update covid data and news articles at ' + update_time
         e_5 = s.enter(update_interval, 1, update_covid_data)
-        e_6 = s.enter(update_interval, 1, news_articles)
+        e_6 = s.enter(update_interval, 1, update_news)
         cancel_update = e_5, e_6
         if repeat_update:
             e_7 = s.enter(update_interval, 1, periodic, (s, 86400,
                                                          update_covid_data))
             e_8 = s.enter(update_interval, 1, periodic, (s, 86400,
-                                                         news_articles))
+                                                         update_news))
             cancel_update = e_5, e_6, e_7, e_8
     UPDATE.append({
         'title': update_name,
